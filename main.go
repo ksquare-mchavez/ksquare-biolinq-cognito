@@ -20,10 +20,10 @@ type ClaimsPage struct {
 }
 
 var (
-	clientID     = "33vu9td0v0l3sll8sva5vu8j72"
-	clientSecret = "1pvnab10o7vo8avuk65sqmhjggk7729sgvtnr3od98j00d3rrd2i"
+	clientID     = "33vu9td0v0l3s..."
+	clientSecret = "1pvnab10o7vo8avuk..."
 	redirectURL  = "http://localhost:8080/callback"
-	issuerURL    = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_MuLHvXh19"
+	issuerURL    = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_M..."
 	oauth2Config oauth2.Config
 )
 
