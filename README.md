@@ -11,6 +11,35 @@ A Go web application using Fiber and AWS Cognito for OIDC authentication.
 - Go 1.18+
 - AWS Cognito User Pool
 
+## Setup
+
+1. **Clone the repository**
+   ```sh
+   git clone https://github.com/biolinq-inc/ksquare-biolinq-cognito.git
+   cd ksquare-biolinq-cognito
+   ```
+
+2. **Install dependencies**
+   ```sh
+   go mod tidy
+   ```
+
+3. **Configure AWS Cognito credentials**
+   - Set your Cognito User Pool details in environment variables or a `.env` file:
+	 ```
+	 COGNITO_CLIENT_ID=your_client_id
+	 COGNITO_CLIENT_SECRET=your_client_secret
+	 COGNITO_DOMAIN=your_cognito_domain
+	 COGNITO_REDIRECT_URI=http://localhost:8080/callback
+	 ```
+
+4. **Run the server**
+   ```sh
+   go run main.go
+   ```
+
+   The application will start on `http://localhost:8080`.
+
 
 ## Example curl Commands
 
