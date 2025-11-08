@@ -31,6 +31,7 @@ A Go web application using Fiber and AWS Cognito for OIDC authentication.
    export COGNITO_CLIENT_SECRET=your_client_secret
    export COGNITO_REDIRECT_URL=http://localhost:8080/callback
    export COGNITO_ISSUER_URL=https://cognito-idp.us-east-2.amazonaws.com/your_pool_id
+   export COGNITO_DOMAIN=https://<your-domain>.auth.<region>.amazoncognito.com/
 	 ```
 
 4. **Run the server**

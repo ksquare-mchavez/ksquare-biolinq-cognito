@@ -28,9 +28,9 @@ var (
 	clientSecret string
 	redirectURL  string
 	issuerURL    string
+	domain       string
 	responseType = "code" // or "token" for implicit flow
 	scope        = []string{"openid", "email", "phone"}
-	domain       = "us-east-207mf3zm1t.auth.us-east-2.amazoncognito.com"
 	signinURL    = "https://%s/login?client_id=%s&response_type=%s&scope=%s&%s"
 	signupURL    = "https://%s/signup?client_id=%s&response_type=%s&scope=%s&%s"
 	oauth2Config oauth2.Config
@@ -41,9 +41,10 @@ func init() {
 	clientSecret = os.Getenv("COGNITO_CLIENT_SECRET")
 	redirectURL = os.Getenv("COGNITO_REDIRECT_URL")
 	issuerURL = os.Getenv("COGNITO_ISSUER_URL")
+	domain = os.Getenv("COGNITO_DOMAIN")
 
-	if clientID == "" || redirectURL == "" || issuerURL == "" {
-		log.Fatal("Missing required environment variables: COGNITO_CLIENT_ID, COGNITO_REDIRECT_URL, COGNITO_ISSUER_URL")
+	if clientID == "" || domain == "" || redirectURL == "" || issuerURL == "" {
+		log.Fatal("Missing required environment variables: COGNITO_CLIENT_ID, COGNITO_DOMAIN, COGNITO_REDIRECT_URL, COGNITO_ISSUER_URL")
 	}
 
 	// Initialize OIDC provider
