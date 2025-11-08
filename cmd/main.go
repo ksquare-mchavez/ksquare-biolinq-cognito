@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"html/template"
 	"log"
+	"net/url"
+	"os"
+	"strings"
 
 	"github.com/coreos/go-oidc"
 	"github.com/gofiber/fiber/v2"
@@ -15,19 +18,34 @@ import (
 )
 
 type ClaimsPage struct {
-	AccessToken string
-	Claims      jwt.MapClaims
+	AccessToken  string
+	Claims       jwt.MapClaims
+	RefreshToken string
 }
 
 var (
-	clientID     = "33vu9td0v0l3s..."
-	clientSecret = "1pvnab10o7vo8avuk..."
-	redirectURL  = "http://localhost:8080/callback"
-	issuerURL    = "https://cognito-idp.us-east-2.amazonaws.com/us-east-2_M..."
+	clientID     string
+	clientSecret string
+	redirectURL  string
+	issuerURL    string
+	responseType = "code" // or "token" for implicit flow
+	scope        = []string{"openid", "email", "phone"}
+	domain       = "us-east-207mf3zm1t.auth.us-east-2.amazoncognito.com"
+	signinURL    = "https://%s/login?client_id=%s&response_type=%s&scope=%s&%s"
+	signupURL    = "https://%s/signup?client_id=%s&response_type=%s&scope=%s&%s"
 	oauth2Config oauth2.Config
 )
 
 func init() {
+	clientID = os.Getenv("COGNITO_CLIENT_ID")
+	clientSecret = os.Getenv("COGNITO_CLIENT_SECRET")
+	redirectURL = os.Getenv("COGNITO_REDIRECT_URL")
+	issuerURL = os.Getenv("COGNITO_ISSUER_URL")
+
+	if clientID == "" || redirectURL == "" || issuerURL == "" {
+		log.Fatal("Missing required environment variables: COGNITO_CLIENT_ID, COGNITO_REDIRECT_URL, COGNITO_ISSUER_URL")
+	}
+
 	// Initialize OIDC provider
 	provider, err := oidc.NewProvider(context.Background(), issuerURL)
 	if err != nil {
@@ -40,14 +58,15 @@ func init() {
 		ClientSecret: clientSecret,
 		RedirectURL:  redirectURL,
 		Endpoint:     provider.Endpoint(),
-		Scopes:       []string{"openid", "email", "phone"},
+		Scopes:       scope,
 	}
 }
 
 func main() {
 	app := fiber.New()
-	app.Get("/", handleHomeFiber)
+	app.Get("/", handleLoginFiber)
 	app.Get("/login", handleLoginFiber)
+	app.Get("/signup", handleSignupFiber)
 	app.Get("/callback", handleCallbackFiber)
 	app.Get("/logout", handleLogoutFiber)
 	app.Get("/cognito", handleCognitoFiber)
@@ -56,25 +75,18 @@ func main() {
 	log.Fatal(app.Listen(":8080"))
 }
 
-// Fiber route handlers
-func handleHomeFiber(c *fiber.Ctx) error {
-	tmpl, err := template.ParseFiles("templates/home.html")
-	if err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Error loading template: " + err.Error())
-	}
-
-	buf := new(bytes.Buffer)
-	if err := tmpl.Execute(buf, nil); err != nil {
-		return c.Status(fiber.StatusInternalServerError).SendString("Error rendering template: " + err.Error())
-	}
-
-	return c.Type("html").SendString(buf.String())
+func handleLoginFiber(c *fiber.Ctx) error {
+	params := url.Values{}
+	params.Add("redirect_uri", redirectURL)
+	loginURL := fmt.Sprintf(signinURL, domain, clientID, responseType, strings.Join(scope, "+"), params.Encode())
+	return c.Redirect(loginURL, fiber.StatusFound)
 }
 
-func handleLoginFiber(c *fiber.Ctx) error {
-	state := "state" // Replace with a secure random string in production
-	url := oauth2Config.AuthCodeURL(state, oauth2.AccessTypeOffline)
-	return c.Redirect(url, fiber.StatusFound)
+func handleSignupFiber(c *fiber.Ctx) error {
+	params := url.Values{}
+	params.Add("redirect_uri", redirectURL)
+	signupURL := fmt.Sprintf(signupURL, domain, clientID, responseType, strings.Join(scope, "+"), params.Encode())
+	return c.Redirect(signupURL, fiber.StatusFound)
 }
 
 func handleCallbackFiber(c *fiber.Ctx) error {
@@ -102,11 +114,12 @@ func handleCallbackFiber(c *fiber.Ctx) error {
 	}
 
 	pageData := ClaimsPage{
-		AccessToken: tokenString,
-		Claims:      claims,
+		AccessToken:  tokenString,
+		Claims:       claims,
+		RefreshToken: rawToken.RefreshToken,
 	}
 
-	tmpl, err := template.ParseFiles("templates/claims.html")
+	tmpl, err := template.ParseFiles("../templates/claims.html")
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).SendString("Error loading template: " + err.Error())
 	}

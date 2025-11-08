@@ -25,12 +25,12 @@ A Go web application using Fiber and AWS Cognito for OIDC authentication.
    ```
 
 3. **Configure AWS Cognito credentials**
-   - Set your Cognito User Pool details in environment variables or a `.env` file:
+   Set Cognito credentials as environment variables:
 	 ```
-	 COGNITO_CLIENT_ID=your_client_id
-	 COGNITO_CLIENT_SECRET=your_client_secret
-	 COGNITO_DOMAIN=your_cognito_domain
-	 COGNITO_REDIRECT_URI=http://localhost:8080/callback
+   export COGNITO_CLIENT_ID=your_client_id
+   export COGNITO_CLIENT_SECRET=your_client_secret
+   export COGNITO_REDIRECT_URL=http://localhost:8080/callback
+   export COGNITO_ISSUER_URL=https://cognito-idp.us-east-2.amazonaws.com/your_pool_id
 	 ```
 
 4. **Run the server**
