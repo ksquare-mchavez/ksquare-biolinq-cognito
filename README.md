@@ -35,7 +35,7 @@ A Go web application using Fiber and AWS Cognito for OIDC authentication.
 
 4. **Run the server**
    ```sh
-   go run main.go
+   go run cmd/main.go
    ```
 
    The application will start on `http://localhost:8080`.
